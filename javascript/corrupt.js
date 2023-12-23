@@ -84,7 +84,10 @@ const getEOCHD = (buff = []) => {
 		}
 	};
 
-	return buff.slice(startPosition.indexPos,startPosition.indexPos+22);
+	return {
+		indexPosition: startPosition.indexPos,
+		EOCHD: buff.slice(startPosition.indexPos,startPosition.indexPos+22)
+	};
 
 }
 
@@ -92,11 +95,16 @@ const damageAchive = (filesBuff) => {
 
 	const unit8Buffer = new Uint8Array(filesBuff.buffer);
 
-	const EOCHD = getEOCHD(unit8Buffer);
+	// get EOCHD (base/mean) 20 bytes
+	const {EOCHD,indexPosition:EOCHDIdx} = getEOCHD(unit8Buffer);
 
-	// store CDFH start postion byte
+	// store CDFH start byte postion
 	const CDFHOffset = parseInt(littleEndian(EOCHD.slice(EOCHD.length-6,EOCHD.length-2),true),16);
 
+	// store CDFH splited Array Bytes
+	const CDFH = splitArr(unit8Buffer.slice(CDFHOffset,EOCHDIdx),[80,75,1,2]) ;
+
+	console.log(CDFHArr);
 };
 
 export default damageAchive;
