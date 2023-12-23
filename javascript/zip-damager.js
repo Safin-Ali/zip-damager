@@ -1,3 +1,5 @@
+import damageAchive from './corrupt.js';
+
 const selectElm = (id) => document.getElementById(id);
 
 const lockBtnElm = selectElm('lockBtn');
@@ -31,4 +33,9 @@ inputFile.addEventListener('change', () => {
 	};
 
 	reader.readAsArrayBuffer(files);
+});
+
+lockBtnElm.addEventListener('click',() => {
+	if(!filesBin || !inputFile.files.length) return alert('no file selected');
+	damageAchive(filesBin);
 });
