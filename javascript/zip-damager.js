@@ -37,5 +37,5 @@ inputFile.addEventListener('change', () => {
 
 lockBtnElm.addEventListener('click',() => {
 	if(!filesBin || !inputFile.files.length) return alert('no file selected');
-	damageAchive(filesBin);
+	damageAchive(new DataView(filesBin));
 });
