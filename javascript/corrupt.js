@@ -89,7 +89,16 @@ const getEOCHD = (buff = []) => {
 		EOCHD: buff.slice(startPosition.indexPos,startPosition.indexPos+22)
 	};
 
-}
+};
+
+// get LFH bytes start position
+const getLFHPos = (cdfhArr) => {
+	let positions = [];
+	for (let i = 0; i < cdfhArr.length; i++) {
+		positions.push(parseInt(littleEndian(cdfhArr[i].slice(42,46),true),16));
+	}
+	return positions
+};
 
 const damageAchive = (filesBuff) => {
 
@@ -102,9 +111,12 @@ const damageAchive = (filesBuff) => {
 	const CDFHOffset = parseInt(littleEndian(EOCHD.slice(EOCHD.length-6,EOCHD.length-2),true),16);
 
 	// store CDFH splited Array Bytes
-	const CDFH = splitArr(unit8Buffer.slice(CDFHOffset,EOCHDIdx),[80,75,1,2]) ;
+	const CDFH = splitArr(unit8Buffer.slice(CDFHOffset,EOCHDIdx),[80,75,1,2]);
 
-	console.log(CDFHArr);
+	// sotre each LFH byte start position array
+	const LFHPosArr = getLFHPos(CDFH);
+
+	console.log(LFHPosArr);
 };
 
 export default damageAchive;
