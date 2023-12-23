@@ -6,27 +6,27 @@ const byteToHex = (byte) => {
 
 // split array by matching sequence array
 const splitArr = (arr = [], values = []) => {
-    const positions = [];
-    const lastIdx = arr.length - values.length + 1;
+	const positions = [];
+	const lastIdx = arr.length - values.length + 1;
 
-    for (let i = 0; i < lastIdx; i++) {
-        let found = true;
-        for (let ti = 0; ti < values.length; ti++) {
-            if (arr[i + ti] !== values[ti]) {
-                found = false;
-                break;
-            }
-        }
-        if (found) {
-            positions.push(i);
-            i += values.length - 1;
-        }
-    }
+	for (let i = 0; i < lastIdx; i++) {
+		let found = true;
+		for (let ti = 0; ti < values.length; ti++) {
+			if (arr[i + ti] !== values[ti]) {
+				found = false;
+				break;
+			}
+		}
+		if (found) {
+			positions.push(i);
+			i += values.length - 1;
+		}
+	}
 
-    return positions.map((pos, idx) => {
-        const endRange = idx === positions.length - 1 ? arr.length : positions[idx + 1];
-        return arr.slice(pos, endRange);
-    });
+	return positions.map((pos, idx) => {
+		const endRange = idx === positions.length - 1 ? arr.length : positions[idx + 1];
+		return arr.slice(pos, endRange);
+	});
 };
 
 // revearse hex value array in big endian to little endian
@@ -40,8 +40,57 @@ const littleEndian = (arr = [], str = false) => {
 	return revBytes
 };
 
+// get EOCHD bytes
+const getEOCHD = (buff = []) => {
+	let startPosition = {
+		found: false,
+		indexPos: 0
+	};
+	// singnature is decimal inteager
+	const singnature = [80, 75, 5, 6];
+
+	for (let i = buff.byteLength - 1; i > 0; i--) {
+
+		if (startPosition.found && startPosition.indexPos) break;
+
+		const currByte = buff[i];
+
+		if (currByte === singnature[0]) {
+
+
+			for (let j = 1; j < singnature.length; j++) {
+
+				if (singnature[j] !== buff[i + j]) {
+					startPosition = {
+						...startPosition,
+						found: false,
+						indexPos: 0
+					}
+					break;
+				} else {
+
+					if (j === 3) {
+						startPosition = {
+							...startPosition,
+							found: true
+						}
+					}
+					startPosition = {
+						...startPosition,
+						indexPos: i
+					}
+				}
+			}
+		}
+	};
+
+	return buff.slice(startPosition.indexPos,startPosition.indexPos+20);
+
+}
+
 const damageAchive = (filesBuff) => {
-	// here will be logic
+	const unit8Buffer = new Uint8Array(filesBuff.buffer);
+	const EOCHD = getEOCHD(unit8Buffer);
 };
 
 export default damageAchive;
