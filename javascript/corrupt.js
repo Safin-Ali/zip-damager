@@ -29,7 +29,7 @@ const splitArr = (arr = [], values = []) => {
 	});
 };
 
-// revearse hex value array in big endian to little endian
+// revearse binary value array in big endian to little endian
 const littleEndian = (arr = [], str = false) => {
 	let revBytes = [];
 	for (let i = arr.length - 1; i >= 0; i--) {
@@ -84,13 +84,19 @@ const getEOCHD = (buff = []) => {
 		}
 	};
 
-	return buff.slice(startPosition.indexPos,startPosition.indexPos+20);
+	return buff.slice(startPosition.indexPos,startPosition.indexPos+22);
 
 }
 
 const damageAchive = (filesBuff) => {
+
 	const unit8Buffer = new Uint8Array(filesBuff.buffer);
+
 	const EOCHD = getEOCHD(unit8Buffer);
+
+	// store CDFH start postion byte
+	const CDFHOffset = parseInt(littleEndian(EOCHD.slice(EOCHD.length-6,EOCHD.length-2),true),16);
+
 };
 
 export default damageAchive;
