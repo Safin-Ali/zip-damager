@@ -111,6 +111,29 @@ const getLFHPos = (cdfhArr) => {
 	return positions
 };
 
+// Function to save a file using the File System Access API
+export const saveFileWithDialog = async (uint8Array,fileName) => {
+	try {
+		// Request access to the file system
+		const handle = await window.showSaveFilePicker({
+			suggestedName:fileName
+		});
+
+		// Create a writable stream to the selected file
+		const writable = await handle.createWritable();
+
+		// Write the contents of the UInt8Array to the file
+		await writable.write(uint8Array);
+
+		// Close the file
+		await writable.close();
+
+		console.log('File saved successfully!');
+	} catch (err) {
+		console.error('Error saving file:', err);
+	}
+}
+
 const damageAchive = (filesBuff) => {
 
 	lockBtnElm.innerText = 'Working...';
