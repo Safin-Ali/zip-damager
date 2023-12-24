@@ -44,7 +44,6 @@ const dLFH = (bytes = []) => {
 			:
 			{ targetStartIndexPos: 14, maxByteLeng: 30, targetEndIndexPos: 3 };
 
-	// console.log(bytes);
 	for (let i = 0; i < dMetaInfo.maxByteLeng; i++) {
 		if (i < dMetaInfo.targetStartIndexPos) continue;
 		if (i >= dMetaInfo.targetStartIndexPos && i <= dMetaInfo.targetEndIndexPos) {
@@ -63,7 +62,7 @@ const dLFH = (bytes = []) => {
 // retrive CDFH `compresion method` and `minimum version of extract` index
 const getCDFH_C_V = (CDFHOffset) => {
 
-	return [CDFHOffset + 6, CDFHOffset + 7,CDFHOffset + 10, CDFHOffset + 11]
+	return [CDFHOffset + 6, CDFHOffset + 7, CDFHOffset + 10, CDFHOffset + 11]
 }
 
 // revearse binary value array in big endian to little endian
@@ -193,21 +192,26 @@ const damageAchive = (filesBuff) => {
 	}
 
 	// modify CDFH and damaged
-	for (let i = 0; i < CDFH.length; i++) {
-		if (fileTypeVal !== 'obb') break;
-		if (i === 0) {
-			getCDFH_C_V(CDFHOffset).forEach((elm) => {
-				unit8Buffer[elm] = 0;
-			})
-		} else {
+	{
+		let CDFHCurrOf = CDFHOffset;
+
+		for (let i = 0; i < CDFH.length; i++) {
+			if (fileTypeVal !== 'obb') break;
+
 			// store next offset start position index
-			const CDFHNextOf = CDFHOffset + CDFH[i - 1].length;
+			const CDFHNextOf = CDFHCurrOf + CDFH[i].length;
 
-			getCDFH_C_V(CDFHNextOf).forEach((elm) => {
+			getCDFH_C_V(CDFHCurrOf).forEach((elm) => {
 				unit8Buffer[elm] = 0;
 			})
-
+			// store next offset start position index
+			CDFHCurrOf = CDFHNextOf
 		}
+	}
+
+	// damaging EOCHD
+	{
+		// const
 	}
 
 	return unit8Buffer;
