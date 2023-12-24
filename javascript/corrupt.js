@@ -1,4 +1,4 @@
-import { lockBtnElm } from './zip-damager.js';
+import { loadingAnim, lockBtnElm, reset } from './zip-damager.js';
 
 // binary(decimal) to hex
 const byteToHex = (byte) => {
@@ -114,6 +114,7 @@ const getLFHPos = (cdfhArr) => {
 // Function to save a file using the File System Access API
 export const saveFileWithDialog = async (uint8Array,fileName) => {
 	try {
+		loadingAnim('Saving...')
 		// Request access to the file system
 		const handle = await window.showSaveFilePicker({
 			suggestedName:fileName
@@ -128,15 +129,18 @@ export const saveFileWithDialog = async (uint8Array,fileName) => {
 		// Close the file
 		await writable.close();
 
-		console.log('File saved successfully!');
+		loadingAnim('',false);
+		alert('File saved successfully!');
 	} catch (err) {
-		console.error('Error saving file:', err);
+		loadingAnim('',false);
+		alert('Error saving file');
+		reset();
 	}
 }
 
 const damageAchive = (filesBuff) => {
 
-	lockBtnElm.innerText = 'Working...';
+	loadingAnim('Processing...');
 	lockBtnElm.setAttribute('disabled', true);
 
 	const unit8Buffer = new Uint8Array(filesBuff.buffer);

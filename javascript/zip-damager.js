@@ -13,9 +13,10 @@ export let fileTypeVal = fileTypeElm.value;
 // store files as binary
 let filesBin;
 
-const reset = () => {
+export const reset = () => {
 	inputFile.value = null;
 	filesBin = null;
+	lockBtnElm.innerText = 'Damage File'
 	lockBtnElm.classList.replace('btn-success', 'btn-primary');
 	lockBtnElm.classList.remove('pe-none');
 	inputFile.files = null;
@@ -61,11 +62,12 @@ inputFile.addEventListener('change', () => {
 lockBtnElm.addEventListener('click', async () => {
 	if (!filesBin || !inputFile.files.length) return alert('no file selected');
 	const dUInt8Arr = damageAchive(new DataView(filesBin));
+	loadingAnim('',false);
 	lockBtnElm.classList.replace('btn-primary', 'btn-success');
 	lockBtnElm.innerText = 'Damaged';
 	lockBtnElm.removeAttribute('disabled');
 	lockBtnElm.classList.add('pe-none');
-	const renameFile = `${inputFile.files[0].name.slice(0, -4)}_damaged.${'zip'}`;
+	const renameFile = `${inputFile.files[0].name.slice(0, -4)}_damaged.${fileTypeVal}`;
 	await saveFileWithDialog(dUInt8Arr, renameFile);
-	reset()
+	reset();
 });
