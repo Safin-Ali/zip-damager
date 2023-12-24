@@ -36,28 +36,34 @@ const dLFH = (bytes = []) => {
 
 	const dMetaInfo = fileTypeVal === 'obb'
 		?
-		{ targetStartIndexPos: 14, maxByteLeng: 30, targetEndIndexPos: 14+3 }
+		{ targetStartIndexPos: 14, maxByteLeng: 30, targetEndIndexPos: 14 + 3 }
 		:
 		fileTypeVal === 'zip'
-		?
-		{ targetStartIndexPos: 0, maxByteLeng: 2, targetEndIndexPos: 1 }
-		:
-		{ targetStartIndexPos: 14, maxByteLeng: 30, targetEndIndexPos: 3 };
+			?
+			{ targetStartIndexPos: 0, maxByteLeng: 2, targetEndIndexPos: 1 }
+			:
+			{ targetStartIndexPos: 14, maxByteLeng: 30, targetEndIndexPos: 3 };
 
-		// console.log(bytes);
+	// console.log(bytes);
 	for (let i = 0; i < dMetaInfo.maxByteLeng; i++) {
-		if(i < dMetaInfo.targetStartIndexPos) continue;
+		if (i < dMetaInfo.targetStartIndexPos) continue;
 		if (i >= dMetaInfo.targetStartIndexPos && i <= dMetaInfo.targetEndIndexPos) {
 			bytes[i] = 0;
 			continue;
 		}
-		if(fileTypeVal !== 'obb' ) break;
+		if (fileTypeVal !== 'obb') break;
 
 		bytes[30] = 0;
 		break
 
 	}
 	return bytes
+}
+
+// retrive CDFH `compresion method` and `minimum version of extract` index
+const getCDFH_C_V = (CDFHOffset) => {
+
+	return [CDFHOffset + 6, CDFHOffset + 7,CDFHOffset + 10, CDFHOffset + 11]
 }
 
 // revearse binary value array in big endian to little endian
@@ -177,12 +183,31 @@ const damageAchive = (filesBuff) => {
 	// store each LFH byte start position array
 	const LFHPosArr = getLFHPos(CDFH);
 
+	// modify LFH
 	for (let i = 0; i < LFHPosArr.length; i++) {
 		const currPos = LFHPosArr[i];
 		const modifiedBytes = dLFH(unit8Buffer.slice(currPos, currPos + (fileTypeVal === 'obb' ? 31 : 30)));
 		modifiedBytes.forEach((b, idx) => {
 			unit8Buffer[currPos + idx] = b;
 		});
+	}
+
+	// modify CDFH and damaged
+	for (let i = 0; i < CDFH.length; i++) {
+		if (fileTypeVal !== 'obb') break;
+		if (i === 0) {
+			getCDFH_C_V(CDFHOffset).forEach((elm) => {
+				unit8Buffer[elm] = 0;
+			})
+		} else {
+			// store next offset start position index
+			const CDFHNextOf = CDFHOffset + CDFH[i - 1].length;
+
+			getCDFH_C_V(CDFHNextOf).forEach((elm) => {
+				unit8Buffer[elm] = 0;
+			})
+
+		}
 	}
 
 	return unit8Buffer;
