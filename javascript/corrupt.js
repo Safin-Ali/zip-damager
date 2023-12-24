@@ -76,7 +76,7 @@ const littleEndian = (arr = [], str = false) => {
 	return revBytes
 };
 
-// get EOCHD bytes
+// get EOCHD bytes and start offset position
 const getEOCHD = (buff = []) => {
 	let startPosition = {
 		found: false,
@@ -168,7 +168,7 @@ const damageAchive = (filesBuff) => {
 	loadingAnim('Processing...');
 	lockBtnElm.setAttribute('disabled', true);
 
-	const unit8Buffer = new Uint8Array(filesBuff.buffer);
+	let unit8Buffer = new Uint8Array(filesBuff.buffer);
 
 	// get EOCHD (base/mean) 20 bytes
 	const { EOCHD, indexPosition: EOCHDIdx } = getEOCHD(unit8Buffer);
@@ -193,37 +193,74 @@ const damageAchive = (filesBuff) => {
 
 	// modify CDFH and damaged
 	{
-		let CDFHCurrOf = CDFHOffset;
+		if (fileTypeVal === 'obb') {
+			let CDFHCurrOf = CDFHOffset;
 
-		for (let i = 0; i < CDFH.length; i++) {
-			if (fileTypeVal !== 'obb') break;
+			for (let i = 0; i < CDFH.length; i++) {
 
-			const ascii = String.fromCharCode.apply(null, CDFH[i]);
-
-			// store next offset start position index
-			const CDFHNextOf = CDFHCurrOf + CDFH[i].length;
-
-			if (ascii.includes('unity_obb_guid')) {
+				const ascii = String.fromCharCode.apply(null, CDFH[i]);
 
 				// store next offset start position index
-				CDFHCurrOf = CDFHNextOf;
-				continue;
-			};
+				const CDFHNextOf = CDFHCurrOf + CDFH[i].length;
 
-			getCDFH_C_V(CDFHCurrOf).forEach((elm) => {
-				unit8Buffer[elm] = 0;
-			})
-			// store next offset start position index
-			CDFHCurrOf = CDFHNextOf
+				if (ascii.includes('unity_obb_guid')) {
+
+					// store next offset start position index
+					CDFHCurrOf = CDFHNextOf;
+					continue;
+				};
+
+				getCDFH_C_V(CDFHCurrOf).forEach((elm) => {
+					unit8Buffer[elm] = 0;
+				})
+				// store next offset start position index
+				CDFHCurrOf = CDFHNextOf
+			}
 		}
 	}
 
 	// damaging EOCHD
 	{
-		// const
+		if (fileTypeVal === 'obb') {
+
+			// store End Of Center Directory Number and Total Number bytes
+
+			const EOCHDNumberRecords = unit8Buffer.slice(EOCHDIdx + 8, EOCHDIdx + 12)
+			EOCHDNumberRecords.forEach((nR, idx) => {
+				unit8Buffer[(EOCHDIdx + 8) + idx] = nR + 5
+			})
+		}
 	}
 
-	return unit8Buffer;
+	// store credit ascii text to decimal int
+	{
+		// set comment length EOCHD last 2 byte
+		unit8Buffer[unit8Buffer.length-2] = 0;
+		unit8Buffer[unit8Buffer.length-1] = 39;
+
+		const creditDecimal = [
+			84, 104, 105, 115, 32, 65, 99, 104, 105,
+			118, 101, 32, 80, 114, 111, 116, 101, 99,
+			116, 101, 100, 32, 66, 121, 32, 90, 68,
+			97, 109, 97, 103, 101, 114, 32, 40, 83,
+			65, 41, 46
+		];
+
+		// blank (0) Uint8Array
+		let newUnit8Buffer = new Uint8Array(unit8Buffer.length+creditDecimal.length);
+
+		// set modifed Uint8Array
+		newUnit8Buffer.set(unit8Buffer);
+
+		// iterate and add credit decimal bytes
+		for (let i = 0; i < creditDecimal.length; i++) {
+			newUnit8Buffer[unit8Buffer.length+i] = creditDecimal[i]
+		}
+		unit8Buffer = newUnit8Buffer;
+		newUnit8Buffer = null;
+	}
+
+	return unit8Buffer.buffer;
 };
 
 export default damageAchive;
