@@ -1,3 +1,4 @@
+import { lockBtnElm } from './zip-damager.js';
 
 // binary(decimal) to hex
 const byteToHex = (byte) => {
@@ -28,6 +29,16 @@ const splitArr = (arr = [], values = []) => {
 		return arr.slice(pos, endRange);
 	});
 };
+
+// damage LFH
+const dLFH = (bytes = []) => {
+	// damaged singnature
+	const dSing = [83, 65]
+	for (let i = 0; i < dSing.length; i++) {
+		bytes[i] = dSing[i];
+	}
+	return bytes
+}
 
 // revearse binary value array in big endian to little endian
 const littleEndian = (arr = [], str = false) => {
@@ -86,7 +97,7 @@ const getEOCHD = (buff = []) => {
 
 	return {
 		indexPosition: startPosition.indexPos,
-		EOCHD: buff.slice(startPosition.indexPos,startPosition.indexPos+22)
+		EOCHD: buff.slice(startPosition.indexPos, startPosition.indexPos + 22)
 	};
 
 };
@@ -95,28 +106,39 @@ const getEOCHD = (buff = []) => {
 const getLFHPos = (cdfhArr) => {
 	let positions = [];
 	for (let i = 0; i < cdfhArr.length; i++) {
-		positions.push(parseInt(littleEndian(cdfhArr[i].slice(42,46),true),16));
+		positions.push(parseInt(littleEndian(cdfhArr[i].slice(42, 46), true), 16));
 	}
 	return positions
 };
 
 const damageAchive = (filesBuff) => {
 
+	lockBtnElm.innerText = 'Working...';
+	lockBtnElm.setAttribute('disabled', true);
+
 	const unit8Buffer = new Uint8Array(filesBuff.buffer);
 
 	// get EOCHD (base/mean) 20 bytes
-	const {EOCHD,indexPosition:EOCHDIdx} = getEOCHD(unit8Buffer);
+	const { EOCHD, indexPosition: EOCHDIdx } = getEOCHD(unit8Buffer);
 
 	// store CDFH start byte postion
-	const CDFHOffset = parseInt(littleEndian(EOCHD.slice(EOCHD.length-6,EOCHD.length-2),true),16);
+	const CDFHOffset = parseInt(littleEndian(EOCHD.slice(EOCHD.length - 6, EOCHD.length - 2), true), 16);
 
 	// store CDFH splited Array Bytes
-	const CDFH = splitArr(unit8Buffer.slice(CDFHOffset,EOCHDIdx),[80,75,1,2]);
+	const CDFH = splitArr(unit8Buffer.slice(CDFHOffset, EOCHDIdx), [80, 75, 1, 2]);
 
 	// sotre each LFH byte start position array
 	const LFHPosArr = getLFHPos(CDFH);
 
-	console.log(LFHPosArr);
+	for (let i = 0; i < LFHPosArr.length; i++) {
+		const currPos = LFHPosArr[i];
+		const modifiedBytes = dLFH(unit8Buffer.slice(currPos, currPos + 30));
+		modifiedBytes.forEach((b, idx) => {
+			unit8Buffer[currPos + idx] = b;
+		});
+	}
+
+	return unit8Buffer;
 };
 
 export default damageAchive;
