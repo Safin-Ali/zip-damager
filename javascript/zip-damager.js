@@ -5,6 +5,9 @@ const selectElm = (id) => document.getElementById(id);
 export const lockBtnElm = selectElm('lockBtn');
 const inputFile = selectElm('inputFile');
 const fileSizeElm = selectElm('fileSize');
+const fileTypeElm = selectElm('fileType');
+
+export let fileTypeVal = fileTypeElm.value;
 
 // store files as binary
 let filesBin;
@@ -19,6 +22,10 @@ const reset = () => {
 	inputFile.removeAttribute('disabled');
 	fileSizeElm.innerText = '0 MB'
 }
+
+fileTypeElm.addEventListener('change',() => {
+	fileTypeVal = fileTypeElm.value;
+});
 
 inputFile.addEventListener('change', () => {
 	const [files] = inputFile.files;

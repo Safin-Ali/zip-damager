@@ -13,6 +13,10 @@
 			align-items: center;
 			height: 100vh;
 		}
+
+		.form-select:focus,.form-control{
+			box-shadow: none !important;
+		}
 		p {
 			font-size: 18px;
 			font-weight: 500;
@@ -30,9 +34,22 @@
 		<p>ZDamager tool repacks your zip, obb, scs files for prevent extraction or unpacking.</p>
 
 		<div class="my-2 d-block">
-			<div>
-				<input class="form-control" type="file" id="inputFile" accept=".zip,.obb,.scs">
+
+			<div class="d-flex justify-content-center gap-3">
+				<!-- file input field -->
+				<div>
+					<input class="form-control" type="file" id="inputFile" accept=".zip,.obb,.scs">
+				</div>
+				<!-- select file type -->
+				<div>
+					<select id="fileType" class="form-select">
+						<option selected value="zip">zip</option>
+						<option value="obb">obb</option>
+						<option value="scs">scs</option>
+					</select>
+				</div>
 			</div>
+			<!-- file size element -->
 			<div class="fw-semibold my-2">
 				<span id="fileSize">0 MB</span>
 			</div>
