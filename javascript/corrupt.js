@@ -249,7 +249,7 @@ const damageAchive = (filesBuff) => {
 		}
 	}
 
-	// store credit ascii text to decimal int
+	// store credit ascii text to Uint8Array
 	{
 		// set comment length EOCHD last 2 byte
 		unit8Buffer[unit8Buffer.length - 2] = 0;
@@ -264,7 +264,7 @@ const damageAchive = (filesBuff) => {
 			65, 41, 46
 		];
 
-		// store preventing EOCHD singnature matching as Uint8Array
+		// store preventing matching EOCHD singnature
 		const EOCHDCorruptSing = [
 			80, 75, 1, 2, 31, 0, 10, 0, 1, 0, 0,
 			0, 67, 3, 13, 3, 52, 151, 192, 83, 89, 0,
@@ -274,6 +274,9 @@ const damageAchive = (filesBuff) => {
 		]
 
 		unit8Buffer = insertBytes(unit8Buffer,creditDecimal);
+
+		// damaged EOCHD singature verification
+		unit8Buffer = insertBytes(unit8Buffer,EOCHDCorruptSing);
 	}
 
 	return unit8Buffer.buffer;
