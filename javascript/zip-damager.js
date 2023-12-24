@@ -2,12 +2,9 @@ import damageAchive from './corrupt.js';
 
 const selectElm = (id) => document.getElementById(id);
 
-const lockBtnElm = selectElm('lockBtn');
-const progValElm = selectElm('progressValue');
-const progBarElm = selectElm('progressBar');
+export const lockBtnElm = selectElm('lockBtn');
 const inputFile = selectElm('inputFile');
 const fileSizeElm = selectElm('fileSize');
-const feildContElm = selectElm('feildContainer');
 
 // store files as binary
 let filesBin;
@@ -37,5 +34,9 @@ inputFile.addEventListener('change', () => {
 
 lockBtnElm.addEventListener('click',() => {
 	if(!filesBin || !inputFile.files.length) return alert('no file selected');
-	damageAchive(new DataView(filesBin));
+	const damagedBuff = damageAchive(new DataView(filesBin));
+	lockBtnElm.classList.replace('btn-primary','btn-success');
+	lockBtnElm.innerText = 'Damaged';
+	lockBtnElm.removeAttribute('disabled');
+	lockBtnElm.classList.add('pe-none');
 });
