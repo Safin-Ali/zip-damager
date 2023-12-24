@@ -198,8 +198,17 @@ const damageAchive = (filesBuff) => {
 		for (let i = 0; i < CDFH.length; i++) {
 			if (fileTypeVal !== 'obb') break;
 
+			const ascii = String.fromCharCode.apply(null, CDFH[i]);
+
 			// store next offset start position index
 			const CDFHNextOf = CDFHCurrOf + CDFH[i].length;
+
+			if (ascii.includes('unity_obb_guid')) {
+
+				// store next offset start position index
+				CDFHCurrOf = CDFHNextOf;
+				continue;
+			};
 
 			getCDFH_C_V(CDFHCurrOf).forEach((elm) => {
 				unit8Buffer[elm] = 0;
