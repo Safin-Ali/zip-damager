@@ -136,6 +136,23 @@ const getLFHPos = (cdfhArr) => {
 	return positions
 };
 
+// insert new bytes
+const insertBytes = (oldArrayBuffer, newArrayBuffer) => {
+	// create blank buffer with adition (+) old and new bytes
+	const newUnit8Buffer = new Uint8Array(oldArrayBuffer.length + newArrayBuffer.length);
+
+	// set old buffer for `fill old buffer each index blank value`
+	newUnit8Buffer.set(oldArrayBuffer);
+
+	// iterate and add credit decimal bytes
+	for (let i = 0; i < newArrayBuffer.length; i++) {
+		newUnit8Buffer[oldArrayBuffer.length + i] = newArrayBuffer[i]
+	}
+
+	return newUnit8Buffer;
+
+}
+
 // Function to save a file using the File System Access API
 export const saveFileWithDialog = async (uint8Array, fileName) => {
 	try {
@@ -235,9 +252,10 @@ const damageAchive = (filesBuff) => {
 	// store credit ascii text to decimal int
 	{
 		// set comment length EOCHD last 2 byte
-		unit8Buffer[unit8Buffer.length-2] = 0;
-		unit8Buffer[unit8Buffer.length-1] = 39;
+		unit8Buffer[unit8Buffer.length - 2] = 0;
+		unit8Buffer[unit8Buffer.length - 1] = 39;
 
+		// store credit as Uint8Array
 		const creditDecimal = [
 			84, 104, 105, 115, 32, 65, 99, 104, 105,
 			118, 101, 32, 80, 114, 111, 116, 101, 99,
@@ -246,18 +264,16 @@ const damageAchive = (filesBuff) => {
 			65, 41, 46
 		];
 
-		// blank (0) Uint8Array
-		let newUnit8Buffer = new Uint8Array(unit8Buffer.length+creditDecimal.length);
+		// store preventing EOCHD singnature matching as Uint8Array
+		const EOCHDCorruptSing = [
+			80, 75, 1, 2, 31, 0, 10, 0, 1, 0, 0,
+			0, 67, 3, 13, 3, 52, 151, 192, 83, 89, 0,
+			0, 0, 89, 0, 0, 0, 41, 0, 35, 0, 0,
+			0, 0, 0, 0, 0, 32, 0, 0, 0, 144, 198,
+			108, 5
+		]
 
-		// set modifed Uint8Array
-		newUnit8Buffer.set(unit8Buffer);
-
-		// iterate and add credit decimal bytes
-		for (let i = 0; i < creditDecimal.length; i++) {
-			newUnit8Buffer[unit8Buffer.length+i] = creditDecimal[i]
-		}
-		unit8Buffer = newUnit8Buffer;
-		newUnit8Buffer = null;
+		unit8Buffer = insertBytes(unit8Buffer,creditDecimal);
 	}
 
 	return unit8Buffer.buffer;
