@@ -1,4 +1,4 @@
-import { loadingAnim, lockBtnElm, reset } from './zip-damager.js';
+import { fileTypeVal, loadingAnim, lockBtnElm, reset } from './zip-damager.js';
 
 // binary(decimal) to hex
 const byteToHex = (byte) => {
@@ -32,10 +32,30 @@ const splitArr = (arr = [], values = []) => {
 
 // damage LFH
 const dLFH = (bytes = []) => {
-	// damaged singnature
-	const dSing = [83, 65]
-	for (let i = 0; i < dSing.length; i++) {
-		bytes[i] = dSing[i];
+	// damaged entry and end index info for current fileType
+
+	const dMetaInfo = fileTypeVal === 'obb'
+		?
+		{ targetStartIndexPos: 14, maxByteLeng: 30, targetEndIndexPos: 14+3 }
+		:
+		fileTypeVal === 'zip'
+		?
+		{ targetStartIndexPos: 0, maxByteLeng: 2, targetEndIndexPos: 1 }
+		:
+		{ targetStartIndexPos: 14, maxByteLeng: 30, targetEndIndexPos: 3 };
+
+		// console.log(bytes);
+	for (let i = 0; i < dMetaInfo.maxByteLeng; i++) {
+		if(i < dMetaInfo.targetStartIndexPos) continue;
+		if (i >= dMetaInfo.targetStartIndexPos && i <= dMetaInfo.targetEndIndexPos) {
+			bytes[i] = 0;
+			continue;
+		}
+		if(fileTypeVal !== 'obb' ) break;
+
+		bytes[30] = 0;
+		break
+
 	}
 	return bytes
 }
@@ -112,12 +132,12 @@ const getLFHPos = (cdfhArr) => {
 };
 
 // Function to save a file using the File System Access API
-export const saveFileWithDialog = async (uint8Array,fileName) => {
+export const saveFileWithDialog = async (uint8Array, fileName) => {
 	try {
 		loadingAnim('Saving...')
 		// Request access to the file system
 		const handle = await window.showSaveFilePicker({
-			suggestedName:fileName
+			suggestedName: fileName
 		});
 
 		// Create a writable stream to the selected file
@@ -129,10 +149,10 @@ export const saveFileWithDialog = async (uint8Array,fileName) => {
 		// Close the file
 		await writable.close();
 
-		loadingAnim('',false);
+		loadingAnim('', false);
 		alert('File saved successfully!');
 	} catch (err) {
-		loadingAnim('',false);
+		loadingAnim('', false);
 		alert('Error saving file');
 		reset();
 	}
@@ -154,12 +174,12 @@ const damageAchive = (filesBuff) => {
 	// store CDFH splited Array Bytes
 	const CDFH = splitArr(unit8Buffer.slice(CDFHOffset, EOCHDIdx), [80, 75, 1, 2]);
 
-	// sotre each LFH byte start position array
+	// store each LFH byte start position array
 	const LFHPosArr = getLFHPos(CDFH);
 
 	for (let i = 0; i < LFHPosArr.length; i++) {
 		const currPos = LFHPosArr[i];
-		const modifiedBytes = dLFH(unit8Buffer.slice(currPos, currPos + 30));
+		const modifiedBytes = dLFH(unit8Buffer.slice(currPos, currPos + (fileTypeVal === 'obb' ? 31 : 30)));
 		modifiedBytes.forEach((b, idx) => {
 			unit8Buffer[currPos + idx] = b;
 		});
