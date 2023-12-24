@@ -56,7 +56,11 @@
 		</div>
 
 		<div>
-			<button type="button" class="btn btn-primary" id="lockBtn" disabled>Lock File</button>
+			<button class="btn btn-primary d-none mx-auto" id="loadingBtn" type="button" disabled>
+				<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+				<span id="loadingVal"></span>
+			  </button>
+			<button type="button" class="btn btn-primary d-block mx-auto" id="lockBtn" disabled>Lock File</button>
 		</div>
 	</section>
 

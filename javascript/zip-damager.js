@@ -6,6 +6,7 @@ export const lockBtnElm = selectElm('lockBtn');
 const inputFile = selectElm('inputFile');
 const fileSizeElm = selectElm('fileSize');
 const fileTypeElm = selectElm('fileType');
+const loadingBtnElm = selectElm('loadingBtn');
 
 export let fileTypeVal = fileTypeElm.value;
 
@@ -15,15 +16,22 @@ let filesBin;
 const reset = () => {
 	inputFile.value = null;
 	filesBin = null;
-	lockBtnElm.classList.replace('btn-success','btn-primary');
+	lockBtnElm.classList.replace('btn-success', 'btn-primary');
 	lockBtnElm.classList.remove('pe-none');
 	inputFile.files = null;
-	lockBtnElm.setAttribute('disabled',!!inputFile.files);
+	lockBtnElm.setAttribute('disabled', !!inputFile.files);
 	inputFile.removeAttribute('disabled');
 	fileSizeElm.innerText = '0 MB'
+};
+
+export const loadingAnim = (value = 'Loading...', activity = true) => {
+
+	lockBtnElm.classList.replace(`${activity ? 'd-block' : 'd-none'}`, `${activity ? 'd-none' : 'd-block'}`);
+	selectElm('loadingVal').innerText = value;
+	loadingBtnElm.classList.replace(`${activity ? 'd-none' : 'd-block'}`,`${activity ? 'd-block' : 'd-none'}`);
 }
 
-fileTypeElm.addEventListener('change',() => {
+fileTypeElm.addEventListener('change', () => {
 	fileTypeVal = fileTypeElm.value;
 });
 
@@ -35,7 +43,7 @@ inputFile.addEventListener('change', () => {
 	const reader = new FileReader();
 
 	reader.onprogress = () => {
-		inputFile.setAttribute('disabled',true)
+		inputFile.setAttribute('disabled', true)
 	};
 
 	reader.onload = (data) => {
@@ -50,14 +58,14 @@ inputFile.addEventListener('change', () => {
 	reader.readAsArrayBuffer(files);
 });
 
-lockBtnElm.addEventListener('click',async () => {
-	if(!filesBin || !inputFile.files.length) return alert('no file selected');
+lockBtnElm.addEventListener('click', async () => {
+	if (!filesBin || !inputFile.files.length) return alert('no file selected');
 	const dUInt8Arr = damageAchive(new DataView(filesBin));
-	lockBtnElm.classList.replace('btn-primary','btn-success');
+	lockBtnElm.classList.replace('btn-primary', 'btn-success');
 	lockBtnElm.innerText = 'Damaged';
 	lockBtnElm.removeAttribute('disabled');
 	lockBtnElm.classList.add('pe-none');
-	const renameFile = `${inputFile.files[0].name.slice(0,-4)}_damaged.${'zip'}`;
-	await saveFileWithDialog(dUInt8Arr,renameFile);
+	const renameFile = `${inputFile.files[0].name.slice(0, -4)}_damaged.${'zip'}`;
+	await saveFileWithDialog(dUInt8Arr, renameFile);
 	reset()
 });
