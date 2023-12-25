@@ -138,6 +138,7 @@ const getLFHPos = (cdfhArr) => {
 
 // insert new bytes
 const insertBytes = (oldArrayBuffer, newArrayBuffer) => {
+
 	// create blank buffer with adition (+) old and new bytes
 	const newUnit8Buffer = new Uint8Array(oldArrayBuffer.length + newArrayBuffer.length);
 
@@ -261,7 +262,7 @@ const damageAchive = (filesBuff) => {
 			118, 101, 32, 80, 114, 111, 116, 101, 99,
 			116, 101, 100, 32, 66, 121, 32, 90, 68,
 			97, 109, 97, 103, 101, 114, 32, 40, 83,
-			65, 41, 46
+			65, 41, 0
 		];
 
 		// store preventing matching EOCHD singnature
@@ -273,7 +274,8 @@ const damageAchive = (filesBuff) => {
 			108, 5
 		]
 
-		unit8Buffer = insertBytes(unit8Buffer,creditDecimal);
+		// insert creadit
+		unit8Buffer = insertBytes(unit8Buffer.slice(0,EOCHDIdx+22),creditDecimal);
 
 		// damaged EOCHD singature verification
 		unit8Buffer = insertBytes(unit8Buffer,EOCHDCorruptSing);
