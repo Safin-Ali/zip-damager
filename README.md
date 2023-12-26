@@ -1,10 +1,10 @@
-# ZDamager
+# ZDamager ♻️
 
 ## Overview
-ZDamager is a web-based tool designed to damage ZIP or OBB (Opaque Binary Blob) files, rendering them unrecoverable for extraction or unpacking while allowing archive viewer software to read their contents. This tool is developed specifically to repack ZIP or OBB files, preventing their extraction or repacking.
+ZDamager is a web-based tool designed to damage ZIP or OBB (Opaque Binary Blob) files, unrecoverable for extraction or unpacking while allowing archive viewer software to read their contents. This tool is developed specifically to repack ZIP or OBB files, for prevent their extraction or repacking.
 
 ### Features
-- **Damaging ZIP/OBB Files:** ZDamager can modify ZIP and OBB files to hinder their extraction or unpacking.
+- **Damage ZIP/OBB Files:** ZDamager can modify ZIP and OBB files to hinder their extraction or unpacking.
 - **Compatibility:** The damaged archives remain readable by archive viewer software but cannot be unpacked or extracted.
 - **Limitation:** Currently, the tool exclusively supports OBB files for damage.
 - **Extracted Content Damage:** If forcely extract or unpack achive then the extracted content will be damage.
